@@ -27,13 +27,10 @@ function helpPanel () {
     echo -e "\n${yellowColour}[+]${endColour}${grayColour}Uso:${endColour}"
     echo -e "\t${purpleColour}u)${endColour} ${grayColour}Actualizar lista de maquinas${endColour}"
     echo -e "\t${purpleColour}m)${endColour} ${grayColour}Buscar por un nombre de maquina${endColour}"
+    echo -e "\t${purpleColour}i)${endColour} ${grayColour}Buscar por un direccion IPs${endColour}"
     echo -e "\t${purpleColour}h)${endColour} ${grayColour}Mostrar este panel de ayuda${endColour}"
 }
 
-function searchMachine() {
-    machineName="$1";
-    echo "$machineName";
-}
 
 function updateFiles(){
     
@@ -67,13 +64,25 @@ function updateFiles(){
     fi
 }
 
+function searchMachine() {
+
+    echo -e "\n${yellowColour}[+]${endColour} Listando las propiedades de la maquina ${blueColour}$machineName${endColour}:\n"
+    cat bundle.js | awk "/name: \"$machineName\"/,/resuelta:/" | grep -vE "id:|sku:|resuelta" | tr -d '"' | tr -d ',' | sed 's/^ *//'
+}
+
+function searchIP(){
+    ipAdress="$1"
+    echo -e "\n La IP es $ipAdress"
+}
+
 #indicators
 declare -i parameter_counter=0
 
-while getopts "m:uh" arg; do
+while getopts "m:ui:h" arg; do
     case $arg in
         m) machineName=$OPTARG; parameter_counter+=1;;
         u) parameter_counter+=2;;
+        i) ipAdress=$OPTARG; parameter_counter+=3;;
         h);;
         *) echo "Invalid Input"; helpPanel;;
     esac
@@ -81,8 +90,12 @@ done
 
 if [ $parameter_counter -eq 1 ]; then
     searchMachine $machineName
-elif [ $parameter_counter -eq 2 ]; then
+    elif [ $parameter_counter -eq 2 ]; then
     updateFiles
-else 
+
+    elif [ $parameter_counter -eq 3 ]; then
+    searchIP "$ipAdress"
+
+    else
     helpPanel
 fi
